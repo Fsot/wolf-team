@@ -1,14 +1,25 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace wolfteam\Http\Controllers\Auth;
 
-use App\User;
-use App\Http\Controllers\Controller;
+use wolfteam\Models\Profil;
+use wolfteam\Notifications\RegisteredUser;
+use wolfteam\Models\User;
+use wolfteam\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
 class RegisterController extends Controller
 {
+
+    protected $wording = [
+        'if_registered'         => 'Votre compte a bien été crée ... tatati tatata',
+        'confirmation_success'  => 'Votre compte a bien été activé.',
+        'confirmation_fail'     => 'Ce lien ne sembnle pas valide.',
+    ];
+
     /*
     |--------------------------------------------------------------------------
     | Register Controller
@@ -27,7 +38,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/profil';
 
     /**
      * Create a new controller instance.
@@ -37,6 +48,34 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+    }
+
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        event(new Registered($user = $this->create($request->all())));
+
+        $user->notify(new RegisteredUser());
+
+        return redirect('/login')->with('success', $this->wording['if_registered']);
+    }
+
+    public function confirm(Request $request, $id, $token)
+    {
+        $user = User::whereRaw('id = '.$id)->where('confirmation_token', $token)->first();
+        if ($user){
+            $user->update([
+                'confirmation_token' => null,
+            ]);
+            $this->createProfil(['id' => $user->id]);
+            $this->guard()->login($user);
+            return $this->registered($request, $user)
+                ?: redirect($this->redirectPath())->with('success', $this->wording['confirmation_success']);;
+        }
+        else{
+            return redirect('/login')->with('error', $this->wording['confirmation_fail']);
+        }
     }
 
     /**
@@ -66,6 +105,14 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
+            'confirmation_token' => str_replace('/', '', bcrypt(str_random(16))),
+        ]);
+    }
+
+    protected function createProfil(array $data)
+    {
+        return Profil::create([
+            'user_id' => $data['id']
         ]);
     }
 }

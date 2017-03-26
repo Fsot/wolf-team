@@ -12,7 +12,7 @@ return [
     | any other location as required by the application or its packages.
     */
 
-    'name' => 'Laravel',
+    'name' => 'Wolf Team',
 
     /*
     |--------------------------------------------------------------------------
@@ -171,12 +171,18 @@ return [
         /*
          * Application Service Providers...
          */
-        App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
+        wolfteam\Providers\AppServiceProvider::class,
+        wolfteam\Providers\AuthServiceProvider::class,
+        // wolfteam\Providers\BroadcastServiceProvider::class,
+        wolfteam\Providers\EventServiceProvider::class,
+        wolfteam\Providers\RouteServiceProvider::class,
 
+        /*
+         * -- DEV
+         */
+
+        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
+        Collective\Html\HtmlServiceProvider::class,
     ],
 
     /*
@@ -225,7 +231,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-
+        'Form' => Collective\Html\FormFacade::class,
+        'Html' => Collective\Html\HtmlFacade::class,
     ],
 
 ];
