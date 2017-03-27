@@ -15,9 +15,9 @@ class RegisterController extends Controller
 {
 
     protected $wording = [
-        'if_registered'         => 'Votre compte a bien été crée ... tatati tatata',
-        'confirmation_success'  => 'Votre compte a bien été activé.',
-        'confirmation_fail'     => 'Ce lien ne sembnle pas valide.',
+        'if_registered'         => 'Votre compte a bien été créé !',
+        'confirmation_success'  => 'Votre compte a bien été activé !',
+        'confirmation_fail'     => "Ce lien n'est pas valide !",
     ];
 
     /*

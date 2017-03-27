@@ -44,7 +44,7 @@ class RegisteredUser extends Notification
                     ->subject('Inscription sur Wolf Team.')
                     ->line('Votre compte a bien été créé mais il doit être confirmé, merci de cliquer sur le lien suivant.')
                     ->action('Confirmer mon compte', url("/confirm/{$notifiable->id}/". urlencode($notifiable->confirmation_token).""))
-                    ->line('un peu de blabla ....');
+                    ->line('Notre site étant encore en ALPHA , merci de nous signaler tout les bugs dans la section correspondante du forum, un bonus de 100 Coins est donné à celui qui trouve un bug valide.');
     }
 
     /**

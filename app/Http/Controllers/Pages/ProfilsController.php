@@ -14,11 +14,11 @@ class ProfilsController extends Controller
     protected $data;
     protected $wording = [
         'error' => [
-            'edit_noAccessProfil' => 'Vous ne pouvez pas accèder à ce profil'
+            'edit_noAccessProfil' => "Vous n'avez pas accés à ce profil !"
         ],
         'title' => [
-            'index' => 'Bonjour ',
-            'edit' => ' vous pouvez éditer votre profil ...',
+            'index' => 'Bonjour',
+            'edit' => 'Vous pouvez désormais éditer votre profil !',
         ]
     ];
     protected $class = [
@@ -81,5 +81,5 @@ class ProfilsController extends Controller
                 'icon'  => $icon
         ];
     }
-    
+
 }
