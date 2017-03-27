@@ -1,5 +1,6 @@
 <div class="page-header">
     <h2><strong>{!! $data['wording']['title'] !!}</strong></h2>
+    @if(Auth::check())
     <div class="btn-group btn-group-sm" role="group" aria-label="...">
         @foreach($data['button'] as $button)
             <a href="{!! $button['link'] !!}" type="button" class="{!! $button['class'] !!}">
@@ -7,4 +8,5 @@
             </a>
         @endforeach
     </div>
+    @endif
 </div>

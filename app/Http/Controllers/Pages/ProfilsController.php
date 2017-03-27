@@ -28,24 +28,35 @@ class ProfilsController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->middleware('auth');
+        $this->middleware('auth')->except('index');
     }
 
-    public function index()
+    public function index($username)
     {
-        $user = Auth::user();
+        $user = User::where('name', $username)->first();
 
         $this->data  = [
             'user'      => $user,
             'profil'    => $user->profil,
             'wording'   => [
-                'title'     => $this->wording['title']['index'] . "<span class='".$this->class['title_name']."'>" .$user->name. "</span>"
+                'title'     => "Profil de <span class='".$this->class['title_name']."'>" .$user->name. "</span>"
             ],
             'button'    => [
                 0 => $this->generate_button(action('Pages\ProfilsController@edit', $user->name),'btn btn-info','Editer mon profil','ion ion-person'),
                 1 => $this->generate_button(null,'btn btn-default','Administration du site','ion ion-gear-b'),
             ]
         ];
+
+        if (Auth::check()){
+            $this->data['wording'] =  [
+                'title'     => $this->wording['title']['index'] . "<span class='".$this->class['title_name']."'>" .$user->name. "</span>"
+            ];
+
+            $this->data['button'] = [
+                0 => $this->generate_button(action('Pages\ProfilsController@edit', $user->name),'btn btn-info','Editer mon profil','ion ion-person'),
+                1 => $this->generate_button(null,'btn btn-default','Administration du site','ion ion-gear-b'),
+            ];
+        }
 
         return view('profils.index', ['data' => $this->data]);
     }

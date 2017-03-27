@@ -19,12 +19,9 @@ Auth::routes();
 
 Route::get('/confirm/{id}/{token}', 'Auth\RegisterController@confirm');
 
-Route::get('/profil', 'Pages\ProfilsController@index');
-Route::get('/profil/edit/{name}', 'Pages\ProfilsController@edit');
+Route::get('/profil/{username}', 'Pages\ProfilsController@index');
 
 
 
 Route::get('/home', 'HomeController@index');
-
-
 
