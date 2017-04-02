@@ -183,10 +183,7 @@ return [
 
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
         Collective\Html\HtmlServiceProvider::class,
-<<<<<<< HEAD
-=======
         Intervention\Image\ImageServiceProvider::class,
->>>>>>> dev-users
     ],
 
     /*
