@@ -6,6 +6,7 @@
  */
 
 require('./bootstrap');
+require('./vendors/bootstrap-datepicker.min');
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
