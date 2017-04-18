@@ -58,7 +58,7 @@ class ProfilsController extends Controller
 
                 $this->data['button'] = [
                     0 => $this->generate_button(action('Pages\ProfilsController@edit', $user->name),'btn btn-info','Editer mon profil','ion ion-person'),
-                    1 => $this->generate_button(null,'btn btn-default','Administration du site','ion ion-gear-b'),
+                    1 => $this->generate_button(action('Administration\UsersController@index'),'btn btn-default','Administration du site','ion ion-gear-b'),
                 ];
             }
             return view('profils.index', ['data' => $this->data]);

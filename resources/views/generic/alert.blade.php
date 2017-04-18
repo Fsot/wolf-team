@@ -19,3 +19,15 @@
         </div>
 
     @endif
+
+
+
+    @if(session('info'))
+
+        <div class="container">
+            <div class="alert alert-info">
+                {!! session('info') !!}
+            </div>
+        </div>
+
+    @endif

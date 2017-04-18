@@ -26,11 +26,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-<<<<<<< HEAD
-    protected $redirectTo = '/profil';
-=======
     protected $redirectTo = '/';
->>>>>>> dev-users
 
     /**
      * Create a new controller instance.
@@ -48,5 +44,22 @@ class LoginController extends Controller
             $request->only($this->username(), 'password'),
             ['confirmation_token' => null]
         );
+    }
+
+
+    /**
+     * Send the response after the user was authenticated.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    protected function sendLoginResponse(Request $request)
+    {
+        $request->session()->regenerate();
+
+        $this->clearLoginAttempts($request);
+
+        return $this->authenticated($request, $this->guard()->user())
+            ?: redirect()->intended($this->redirectPath());
     }
 }

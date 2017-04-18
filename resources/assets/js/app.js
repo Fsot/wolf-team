@@ -7,15 +7,26 @@
 
 require('./bootstrap');
 require('./vendors/bootstrap-datepicker.min');
+var SimpleMDE = require('simplemde/dist/simplemde.min');
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
+
+
+    Vue.component('example', require('./components/Example.vue'));
+
+    const app = new Vue({
+        el: '#app'
+    });
+
  */
 
-Vue.component('example', require('./components/Example.vue'));
+var MDtextarea = $("#mdeditor")[0];
 
-const app = new Vue({
-    el: '#app'
-});
+if(MDtextarea){
+    var simplemde = new SimpleMDE({
+        element: MDtextarea
+    });
+}
