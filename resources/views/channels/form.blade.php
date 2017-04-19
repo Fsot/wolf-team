@@ -1,12 +1,6 @@
 {!! Form::model($channel,['files' => 'true', 'url' => action('Administration\ChannelsController@'.$action, ['channel' => $channel]), 'method' => $action == "store" ? 'Post' : 'Put', 'class' => 'form-horizontal'])  !!}
 
 <div class="content-box">
-    <h3 class="content-box-header content-box-header-alt bg-default">
-        <i class="glyph-icon icon-linecons-cog"></i>
-        <span class="header-wrapper">
-                Ajouter un sujet
-        </span>
-    </h3>
     <div class="content-box-wrapper">
 
         <div class="form-group{{ $errors->has('title') ? ' has-error' : '' }}">

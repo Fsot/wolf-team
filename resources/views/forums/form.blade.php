@@ -26,8 +26,7 @@
     </div>
     <div class="row">
         <div class="col-md-12">
-            <textarea name="content" id="mdeditor">
-            </textarea>
+            {!! Form::textarea('content', $thread->content, ['id' => 'mdeditor']) !!}
         </div>
     </div>
     <div class="row">

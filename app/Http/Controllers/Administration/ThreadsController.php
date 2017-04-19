@@ -15,9 +15,9 @@ class ThreadsController extends Controller
 
     public function thread($thread_id)
     {
-        if($thread_id){
-            $thread = Thread::findOrFail($thread_id)->first();
 
+        if($thread_id){
+            $thread = Thread::findOrFail($thread_id);
             return view('threads.thread', compact('thread'));
         }
     }

@@ -20,6 +20,13 @@
             <div class="col-md-10">
                 <div class="panel panel-default">
                     <div class="panel-body">
+                        @if(Auth::check())
+                            @if(Auth::user()->id == $thread->user_id)
+                                <div class="btn-group pull-right">
+                                    <a href="{!! action('Pages\ForumsController@edit_thread', $thread->id) !!}" class="btn btn-default"><i class="glyphicon glyphicon-pencil"></i></a>
+                                </div>
+                            @endif
+                        @endif
                         <h5><strong>{!! $thread->user->name !!},</strong> {!! $thread->created_at !!} - <small><a href="" class="text-danger">Signaler</a></small></h5>
                         <hr>
                         {!! $subject->text !!}

@@ -13,7 +13,7 @@ use Auth;
 use GrahamCampbell\Markdown\Facades\Markdown;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
-use Intervention\Image\Exception\NotFoundException;
+use League\HTMLToMarkdown\HtmlConverter;
 use wolfteam\Http\Controllers\Controller;
 use wolfteam\Http\Requests\AnswerRequest;
 use wolfteam\Http\Requests\UpdateForumChannelRequest;
@@ -92,6 +92,27 @@ class ForumsController extends Controller
             }
         }
         return redirect()->action('Pages\ForumsController@index')->with('erreur', 'Erreur sur l\'enregistrement de votre sujet.');
+    }
+
+    public function edit_thread($thread_id)
+    {
+        if($thread_id && is_numeric($thread_id)){
+            $thread = Thread::findOrFail($thread_id);
+
+
+            $thread->content = $thread->messages->where('id', $thread->answer_id)->first()->text;
+            $converter = new HtmlConverter();
+            $thread->content = $converter->convert($thread->content);
+
+            if($thread){
+                $c = Channel::all();
+                if($c){
+                    $channel = $c->where('id', $thread->channel_id)->first();
+                    $channels = $c->pluck('title', 'id');
+                    return view('forums.edit_thread', compact('thread', 'channel', 'channels'));
+                }
+            }
+        }
     }
 
     public function thread($thread_slug){

@@ -37,9 +37,9 @@ Route::group(['prefix' => 'admin'], function() {
     Route::get('/users', 'Administration\UsersController@index');
     Route::get('/profils', 'Administration\ProfilsController@index');
 
-    Route::post('/users/permissions/{user}', 'Administration\UsersController@assign_role');
 
     Route::group(['middleware' => ['role:admin']], function() {
+        Route::post('/users/permissions/{user}', 'Administration\UsersController@assign_role');
         Route::get('/roles', 'Administration\RolesController@index');
         Route::get('/role/create', 'Administration\RolesController@create');
         Route::post('/role/create', 'Administration\RolesController@store');
@@ -61,8 +61,6 @@ Route::group(['prefix' => 'admin'], function() {
         Route::get('/forum/desactivate', 'Administration\ChannelsController@desactivate_forum');
 
         Route::get('/channel/{channel}', 'Administration\ChannelsController@channel');
-
-
         Route::get('/thread/{thread}', 'Administration\ThreadsController@thread');
     });
 });
@@ -74,4 +72,5 @@ Route::group(['prefix' => 'forum'], function(){
     Route::post('/nouveau-sujet', 'Pages\ForumsController@store_thread');
     Route::get('/{thread_slug}', 'Pages\ForumsController@thread');
     Route::post('/answer/{thread_slug}', 'Pages\ForumsController@answer');
+    Route::get('/sujet/edit/{thread}', 'Pages\ForumsController@edit_thread');
 });
