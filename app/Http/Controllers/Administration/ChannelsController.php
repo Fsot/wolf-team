@@ -10,8 +10,11 @@ namespace wolfteam\Http\Controllers\Administration;
 
 
 use wolfteam\Http\Controllers\Controller;
+use wolfteam\Http\Requests\UpdateCategorieRequest;
 use wolfteam\Http\Requests\UpdateChannelRequest;
+use wolfteam\Models\Categorie;
 use wolfteam\Models\Channel;
+use wolfteam\Models\Message;
 use wolfteam\Models\Setting;
 use wolfteam\Models\Thread;
 
@@ -40,9 +43,15 @@ class ChannelsController extends Controller
 
     public function index()
     {
-        $channels = Channel::all();
+        $channels = [];
+        $c = Channel::all();
+        $categories = Categorie::where('type', 'forum')->get();
+        foreach ($categories as $category) {
+            $channels[$category->title] = $c->where('categorie_id', $category->id);
+        }
         $settings = Setting::where('name', 'like', 'forum%')->get();
-        return view('channels.index', compact('channels', 'settings'));
+        $msg_adv = Message::where('alert', 1)->get();
+        return view('channels.index', compact('channels', 'settings', 'categories', 'msg_adv'));
     }
 
     public function create()
@@ -50,7 +59,8 @@ class ChannelsController extends Controller
         $channel = new Channel();
         $color = $this->color;
         $icon = $this->icon;
-        return view('channels.create', compact('channel','color','icon'));
+        $categories = Categorie::where('type', 'forum')->pluck('title', 'id');
+        return view('channels.create', compact('channel','color','icon', 'categories'));
     }
 
     public function store(UpdateChannelRequest $request)
@@ -61,8 +71,9 @@ class ChannelsController extends Controller
             'title' => $request->title,
             'slug'  => $request->slug,
             'color'  => $request->color,
-            'icon'  => 'test',
-            'block' => $request->block
+            'icon'  => 'test', // TODO a modif
+            'block' => $request->block,
+            'categorie_id' => $request->categorie
         ]);
 
         if($channel){
@@ -77,7 +88,8 @@ class ChannelsController extends Controller
             if($channel) {
                 $color = $this->color;
                 $icon= $this->icon;
-                return view('channels.edit', compact('channel','icon','color'));
+                $categories = Categorie::where('type', 'forum')->pluck('title', 'id');
+                return view('channels.edit', compact('channel','icon','color', 'categories'));
             }
         }
     }
@@ -90,10 +102,11 @@ class ChannelsController extends Controller
             if($channel){
                 isset($request->block) ? $request->block = true : $request->block = false ;
                 $update = $channel->update([
-                   'title' => $request->title,
-                   'color' => $request->color,
-                   'icon' => $request->icon,
-                    'block' => $request->block
+                    'title' => $request->title,
+                    'color' => $request->color,
+                    'icon' => $request->icon,
+                    'block' => $request->block,
+                    'categorie_id' => $request->categorie
                 ]);
                 if($update == true){
                     return redirect()->action('Administration\ChannelsController@index')->with('success', 'Le sujet a bien été modifié');
@@ -143,6 +156,19 @@ class ChannelsController extends Controller
             ]);
         }
         return redirect()->back()->with('success', 'Le forum a été désactivé.');
+    }
+
+    public function store_categorie(UpdateCategorieRequest $request)
+    {
+        $persist_categorie = Categorie::create([
+           'title' => $request->title,
+            'slug' => $request->slug,
+            'type' => 'forum'
+        ]);
+
+        if($persist_categorie == true){
+            return redirect()->back()->with('success', 'La catégorie a bien été sauvegardée');
+        }
     }
 
     protected function created($data)

@@ -27,8 +27,13 @@
                                 </div>
                             @endif
                         @endif
-                        <h5><strong>{!! $thread->user->name !!},</strong> {!! $thread->created_at !!} - <small><a href="" class="text-danger">Signaler</a></small></h5>
+                        <h5><strong>{!! $thread->user->name !!},</strong> {!! $thread->created_at !!}@if(Auth::check() && $thread->user_id != Auth::id()) - <small><a href="{!! action('Pages\ForumsController@advertissement', $thread->answer_id) !!}" class="text-danger">Signaler</a></small>@endif</h5>
                         <hr>
+                        @if($subject->moderate == 1)
+                            <div class="alert alert-info">
+                                <p><small><i class="glyphicon glyphicon-pushpin"></i> Ce message a été modéré par notre équipe. Une partie de son contenu a été modifié ou supprimer</small></p>
+                            </div>
+                        @endif
                         {!! $subject->text !!}
                     </div>
                 </div>
@@ -50,8 +55,20 @@
                <div class="col-md-10">
                    <div class="panel panel-default">
                        <div class="panel-body">
-                           <h5><strong>{!! $answer->user->name !!},</strong> {!! $answer->created_at !!} - <small><a href="" class="text-danger">Signaler</a></small></h5>
+                           @if(Auth::check())
+                               @if(Auth::user()->id == $answer->user_id)
+                                   <div class="btn-group pull-right">
+                                       <a href="{!! action('Pages\ForumsController@edit_message', $answer->id) !!}" class="btn btn-default"><i class="glyphicon glyphicon-pencil"></i></a>
+                                   </div>
+                               @endif
+                           @endif
+                           <h5><strong>{!! $answer->user->name !!},</strong> {!! $answer->created_at !!} @if(Auth::check() && $answer->user_id != Auth::id())- <small><a href="{!! action('Pages\ForumsController@advertissement', $answer->id) !!}" class="text-danger">Signaler</a></small>@endif</h5>
                            <hr>
+                           @if($answer->moderate == 1)
+                                <div class="alert alert-info">
+                                    <p><small><i class="glyphicon glyphicon-pushpin"></i> Ce message a été modéré par notre équipe. Une partie de son contenu a été modifié ou supprimer</small></p>
+                                </div>
+                           @endif
                            {!! $answer->text !!}
                        </div>
                    </div>

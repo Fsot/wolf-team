@@ -13,6 +13,16 @@
             </div>
         </div>
 
+        <div class="form-group{{ $errors->has('categorie') ? ' has-error' : '' }}">
+            <div class="col-md-12">
+                <label>Catégorie</label>
+                {!! Form::select('categorie', $categories, null, ['class' => 'form-control'])  !!}
+                @if ($errors->has('categorie'))
+                    <span class="help-block"><strong>{{ $errors->first('categorie') }}</strong></span>
+                @endif
+            </div>
+        </div>
+
         <div class="form-group{{ $errors->has('color') ? ' has-error' : '' }}">
             <div class="col-md-12">
                 <label>Couleur</label>

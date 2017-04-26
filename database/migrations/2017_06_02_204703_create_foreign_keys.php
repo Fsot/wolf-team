@@ -33,6 +33,9 @@ class CreateForeignKeys extends Migration {
 						->onDelete('no action')
 						->onUpdate('cascade');
 		});
+
+		$seed = new DatabaseSeeder();
+		$seed->run();
 	}
 
 	public function down()

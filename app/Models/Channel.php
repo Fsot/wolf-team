@@ -7,7 +7,12 @@ use Illuminate\Support\Str;
 
 class Channel extends Model
 {
-    protected $fillable = ['title', 'slug','color', 'icon', 'block'];
+    protected $fillable = ['title', 'slug','color', 'icon', 'block', 'categorie_id'];
+
+    public function categorie()
+    {
+        return $this->belongsTo(Categorie::class);
+    }
 
     public function setSlugAttribute($slug)
     {

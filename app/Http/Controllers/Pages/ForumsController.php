@@ -17,6 +17,9 @@ use League\HTMLToMarkdown\HtmlConverter;
 use wolfteam\Http\Controllers\Controller;
 use wolfteam\Http\Requests\AnswerRequest;
 use wolfteam\Http\Requests\UpdateForumChannelRequest;
+use wolfteam\Http\Requests\UpdateMessageRequest;
+use wolfteam\Http\Requests\UpdateThreadRequest;
+use wolfteam\Models\Categorie;
 use wolfteam\Models\Channel;
 use wolfteam\Models\Message;
 use wolfteam\Models\Setting;
@@ -43,7 +46,12 @@ class ForumsController extends Controller
 
     public function index()
     {
-        $channels = Channel::all();
+        $channels = [];
+        $c = Channel::all();
+        $categories = Categorie::where('type', 'forum')->get();
+        foreach ($categories as $category) {
+            $channels[$category->title] = $c->where('categorie_id', $category->id);
+        }
         return view('forums.index', compact('channels'));
     }
 
@@ -115,6 +123,31 @@ class ForumsController extends Controller
         }
     }
 
+    public function update_thread($thread_id, UpdateThreadRequest $request)
+    {
+        if($thread_id){
+            if(is_numeric($thread_id)){
+                $thread = Thread::findOrFail($thread_id);
+                if($thread){
+                    $message = Message::findOrFail($thread->answer_id);
+                    if($message){
+                        $persist_thread = $thread->update([
+                           'title' => $request->title,
+                            'channel_id' => $request->channel
+                        ]);
+                        $persist_msg = $message->update([
+                           'text' => Markdown::convertToHtml($request->input('content'))
+                        ]);
+                        if($persist_msg == true && $persist_thread == true){
+                            return redirect()->action('Pages\ForumsController@thread', $thread->slug)->with('success', 'Votre sujet a bien été modifié.');
+                        }
+                    }
+                }
+            }
+        }
+        return redirect()->action('Pages\ForumsController@thread', $thread->slug)->with('error', 'Erreur sur la modification de votre sujet.');
+    }
+
     public function thread($thread_slug){
         $thread = Thread::where('slug', $thread_slug)->first();
         $content = Message::where('thread_id', $thread->id)->orderBy('created_at', 'desc')->get();
@@ -138,6 +171,55 @@ class ForumsController extends Controller
             return redirect()->back()->with('success', 'Votre message a été publié.');
         }
     }
+
+    public function edit_message($msg_id)
+    {
+        if($msg_id){
+            if(is_numeric($msg_id)){
+                $msg = Message::findOrFail($msg_id);
+                if($msg){
+                    if($msg->user_id == Auth::user()->id){
+                        $converter = new HtmlConverter();
+                        $msg->text = $converter->convert($msg->text);
+                        return view('forums.edit_message', compact('msg'));
+                    }
+                }
+            }
+        }
+    }
+
+    public function update_message($msg_id, UpdateMessageRequest $request)
+    {
+        if($msg_id){
+            if(is_numeric($msg_id)){
+                $msg = Message::findOrFail($msg_id);
+                if($msg->user_id == Auth::user()->id){
+                    $msg->update([
+                       'text' => Markdown::convertToHtml($request->input('content'))
+                    ]);
+                    return redirect()->action('Pages\ForumsController@thread', $msg->thread->slug)->with('success', 'Votre message a bien été modifié.');
+                }
+            }
+        }
+        return redirect()->action('Pages\ForumsController@thread', $msg->thread->slug)->with('error', 'Erreur sur la modification de votre message.');
+    }
+
+    public function advertissement($msg_id)
+    {
+        if($msg_id){
+            if(is_numeric($msg_id)){
+                $msg = Message::findOrFail($msg_id);
+                if($msg){
+                    $msg->update([
+                       'alert' => true
+                    ]);
+                    return redirect()->back()->with('success', 'Le message a bien été signalé à notre equipe. Nous allons effectuer des verifications sur son contenu.');
+                }
+            }
+        }
+        return redirect()->back()->with('error', 'Erreur sur le signalement du message.');
+    }
+
 
     private function paginate($items, $perPage)
     {

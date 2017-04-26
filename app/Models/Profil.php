@@ -70,6 +70,8 @@ class Profil extends Model
         if($user == true){
             if (file_exists(storage_path('app/public'. $this->getImageDir() . $user . '.png'))){
                 return asset('users/avatars/' . $user .  '.png');
+            }else{
+                return 'https://www.gravatar.com/avatar/'.md5($user);
             }
         }
     }

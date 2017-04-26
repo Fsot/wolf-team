@@ -31,7 +31,11 @@
     </div>
     <div class="row">
         <div class="col-md-12">
-            {!! Form::submit('Créer le sujet', ['class' => 'btn btn-success']) !!}
+            @if($action == 'store_thread')
+                {!! Form::submit('Créer le sujet', ['class' => 'btn btn-success']) !!}
+            @else
+                {!! Form::submit('Editer le sujet', ['class' => 'btn btn-success']) !!}
+            @endif
         </div>
     </div>
 {!! Form::close() !!}

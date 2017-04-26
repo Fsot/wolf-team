@@ -34,7 +34,6 @@
                                 <td>
                                     @if($thread->messages->last()->id != $thread->answer_id)
                                         De <strong>{!! $thread->messages->last()->user->name !!}</strong>,
-                                        De <strong>{!! $thread->messages->last()->user->name !!}</strong>,
                                     <i><small>{!! $thread->messages->last()->created_at !!}</small></i>
                                     @endif
                                 </td>

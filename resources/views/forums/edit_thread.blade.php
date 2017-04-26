@@ -7,8 +7,8 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <h2>Créer un nouveau sujet</h2>
-                @include('forums.form', ['action' => 'store_thread'])
+                <h2>Editer le sujet : <strong>{!!  $thread->title !!}</strong></h2>
+                @include('forums.form', ['action' => 'update_thread'])
             </div>
         </div>
     </div>
