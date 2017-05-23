@@ -9,14 +9,19 @@
 namespace wolfteam\Http\Controllers\Administration;
 
 
+use Illuminate\Notifications\Notifiable;
 use League\HTMLToMarkdown\HtmlConverter;
 use wolfteam\Http\Controllers\Controller;
 use wolfteam\Http\Requests\UpdateMessageRequest;
 use wolfteam\Models\Message;
 use GrahamCampbell\Markdown\Facades\Markdown;
+use wolfteam\Models\Thread;
+use wolfteam\Models\User;
+use wolfteam\Notifications\ModeratedForumMessage;
 
 class MessagesController extends Controller
 {
+    use Notifiable;
 
     public function __construct()
     {
@@ -46,7 +51,7 @@ class MessagesController extends Controller
             if(is_numeric($msg_id)){
                 $msg  = Message::findOrFail($msg_id);
                 if($msg){
-                    $converter = new HtmlConverter();
+                    $converter = new HtmlConverter(['header_style' => 'atx']);
                     $msg->text = $converter->convert($msg->text);
                     return view('messages.do_moderate', compact('msg'));
                 }
@@ -60,21 +65,65 @@ class MessagesController extends Controller
             if(is_numeric($msg_id)){
                 $msg = Message::findOrFail($msg_id);
                 if($msg){
-                    $msg->update([
+                    $update = $msg->update([
                         'text' => Markdown::convertToHtml($request->input('content')),
+                        'doModerate' => $request->input('doModerate'),
                         'moderate' => true,
                         'alert' => false
                     ]);
-                    return redirect()->action('Administration\ChannelsController@index')->with('success', 'Le message a été modéré.');
+                    if($update == true){
+                        $user = User::findOrFail($msg->user_id);
+                        if($user){
+                            $thread = Thread::findOrFail($msg->thread_id);
+                            foreach (\Auth::user()->notifications as $notification) {
+                                if(isset($notification->data['msg'])){
+                                    if($notification->data['msg'] == $msg->id){
+                                        $notification->delete();
+                                    }
+                                }
+                            }
+                            $user->notify(new ModeratedForumMessage($msg, $thread));
+                        }
+                        return redirect()->action('Administration\ChannelsController@index')->with('success', 'Le message a été modéré.');
+                    }
                 }
             }
         }
         return redirect()->action('Administration\ChannelsController@index')->with('error', 'Le message n\'a pas pus être modéré.');
     }
 
-    public function do_destroy()
+    public function lockMessages($msg_id)
     {
+        if($msg_id){
+            if(is_numeric($msg_id)){
+                $msg = Message::findOrFail($msg_id);
+                if($msg){
+                    $msg->update([
+                        'destroy' => true,
+                        'alert' => false
+                    ]);
+                    return redirect()->back()->with('success', 'Le message a été bloqué');
+                }
+            }
+        }
+        return redirect()->back()->with('error', 'Erreur sur le bloquage du message');
+    }
 
+    public function unlockMessages($msg_id)
+    {
+        if($msg_id){
+            if(is_numeric($msg_id)){
+                $msg = Message::findOrFail($msg_id);
+                if($msg){
+                    $msg->update([
+                        'destroy' => false,
+                        'alert' => false
+                    ]);
+                    return redirect()->back()->with('success', 'Le message a été débloqué');
+                }
+            }
+        }
+        return redirect()->back()->with('error', 'Erreur sur le débloquage du message');
     }
 
     public function __get_message($msg_id)

@@ -27,8 +27,6 @@
                             <ul class="dropdown-menu" role="menu">
                                 <li><a href="#">Settings 1</a>
                                 </li>
-                                <li><a href="#">Settings 2</a>
-                                </li>
                             </ul>
                         </li>
                     </ul>
@@ -48,8 +46,19 @@
                         <tbody>
                         @foreach($threads as $thread)
                             <tr>
-                                <td>{!! $thread->id !!}</td>
-                                <td><a href="{!! action('Administration\ThreadsController@thread', $thread) !!}">{!! $thread->title !!}</a></td>
+                                <td>
+                                    {!! $thread->id !!}
+                                    @if($thread->destroy == 1) <button type="button" class="btn btn-success btn-xs" onclick="event.preventDefault(); document.getElementById('unlock-{!! $thread->id !!}').submit();"><i class="fa fa-unlock-alt"></i></button>
+                                        {!! Form::open(['url' => action('Administration\MessagesController@unlockMessages', $thread->messages->where('id',$thread->answer_id)->first()->id), 'method' => 'put', 'id' => 'unlock-'.$thread->id]) !!}
+                                        {!! Form::close() !!}
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{!! action('Administration\ThreadsController@thread', $thread) !!}">{!! $thread->title !!}</a>
+                                    @if($thread->destroy == 1)
+                                        <span class="label label-danger">Ce message est bloqué</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">{!! $thread->messages->whereNotIn('id', $thread->answer_id)->count() !!}</td>
                                 <td>
                                     @if($thread->messages->last()->id != $thread->answer_id)
@@ -60,8 +69,10 @@
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="{!! action('Administration\ThreadsController@thread', $thread) !!}" class="btn btn-xs btn-info">Editer</a>
-                                        <a href="" class="btn btn-xs btn-danger">Supprimer</a>
+                                        <a href="{!! action('Administration\ThreadsController@thread', $thread) !!}" class="btn btn-xs btn-info">Voir</a>
+                                        <a href="#" class="btn btn-xs btn-danger" onclick="event.preventDefault(); document.getElementById('destroy_thread-form').submit();">Supprimer</a>
+                                        {!! Form::open(['url' => action('Administration\ThreadsController@destroy_thread', $thread), 'method' => 'delete', 'id' => 'destroy_thread-form']) !!}
+                                        {!! Form::close() !!}
                                     </div>
                                 </td>
                             </tr>

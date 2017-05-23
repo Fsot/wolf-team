@@ -30,6 +30,7 @@
                         </ul>
                     </li>
                 @endif
+                @include('generic.admin.notifications')
             </ul>
         </nav>
     </div>

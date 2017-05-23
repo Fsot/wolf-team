@@ -42,7 +42,9 @@
                 </div>
                 <div class="x_content">
                     @foreach($channels as $k => $c)
-                        <h3>{!! $k !!}</h3>
+                        <h3>
+                            {!! $k !!}
+                        </h3>
                         <table class="table table-bordered">
                             <thead>
                             <tr>
@@ -68,7 +70,9 @@
                                             <div class="btn-group">
                                                 <a href="{{ action('Administration\ChannelsController@channel', $channel->id) }}" class="btn btn-xs btn-success">Voir</a>
                                                 <a href="{{ action('Administration\ChannelsController@edit', $channel->id) }}" class="btn btn-xs btn-info">Editer</a>
-                                                <a href="" class="btn btn-xs btn-danger">Supprimer</a>
+                                                <a href="#" class="btn btn-xs btn-danger" onclick="event.preventDefault();if (confirm('Êtez-vous sur de vouloir supprimer ce forum ? Cette action est irreversible et cela supprimera tous les sujets et messages liés à ce forum')){document.getElementById('destroy_thread-form-{!! $channel->id !!}').submit();}">Supprimer</a>
+                                                {!! Form::open(['url' => action('Administration\ChannelsController@destroy_channel', $channel->id), 'method' => 'delete', 'id' => 'destroy_thread-form-'.$channel->id.'']) !!}
+                                                {!! Form::close() !!}
                                             </div>
                                         </td>
                                     </tr>
@@ -94,31 +98,69 @@
                     <hr>
                     <h4>Toutes mes catégories</h4>
                     @foreach($categories as $category)
-                        <span class="label label-default">{!! $category->title !!}</span>
+                        <div class="btn-group btn-group-xs" role="group">
+                            <a href="#" onclick="event.preventDefault();if (confirm('Êtez-vous sur de vouloir supprimer cette catégorie ? Cette action est irreversible et cela supprimera tous les sujets et messages de cette catégorie')){document.getElementById('destroy_category-form-{!! $category->id !!}').submit();}" class="btn btn-danger" data-toggle="tooltip" data-placement="bottom" data-original-title="Supprimer la catégorie">
+                                {!! $category->title !!}
+                            </a>
+                        </div>
+                        {!! Form::open(['url' => action('Administration\ChannelsController@destroy_category', $category->id), 'method' => 'delete', 'style' => 'display: none','id' => 'destroy_category-form-'.$category->id.'']) !!}
+                        {!! Form::close() !!}
                     @endforeach
                 </div>
             </div>
         </div>
         <div class="col-md-4">
+            <div class="col-md-6 col-sm-12 col-xs-6 tile_stats_count">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-newspaper-o"></i></div>
+                    <div class="count">{!! $total_subject !!}</div>
+                    <h3>Total de sujet</h3>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-6 tile_stats_count">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-pencil"></i></div>
+                    <div class="count">{!! $total_msg !!}</div>
+                    <h3>Total de message</h3>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-6 tile_stats_count">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-modx"></i></div>
+                    <div class="count text-warning">{!! $total_moderate !!}</div>
+                    <h3>Messages modérés</h3>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-6 tile_stats_count">
+                <div class="tile-stats">
+                    <div class="icon"><i class="fa fa-lock"></i></div>
+                    <div class="count red">{!! $total_destroy !!}</div>
+                    <h3>Messages bloqués</h3>
+                </div>
+            </div>
             <div class="x_panel">
                 <div class="x_title">
                     <h4>Messages signalés</h4>
                 </div>
                 <div class="x_content">
                     <ul class="list-unstyled">
-                        @foreach($msg_adv as $m)
-                            <li>
-                                <p>Message de : <strong>{!! $m->user->name !!}</strong>, <em><small>{!! $m->created_at !!}</small></em></p>
-                                <p><strong>{!! \Illuminate\Support\Str::limit($m->text,100) !!}</strong></p>
-                                <div class="btn-group btn-group-xs">
-                                    <a href="#" class="btn btn-info" id="msg-{!! $m->id !!}" data-url="{!! action('Administration\MessagesController@__get_message', $m->id) !!}" data-msg="{!! $m->id !!}" onclick="get_message(this, event)" data-toggle="modal" data-target=".bs-example-modal-lg">Voir le message en entier</a> <!-- TODO A faire -->
-                                    <a href="{!! action('Administration\MessagesController@do_nothing', $m) !!}" class="btn btn-success">Ne rien faire</a>
-                                    <a href="{!! action('Administration\MessagesController@do_moderate', $m) !!}" class="btn btn-warning">Modérer</a>
-                                    <a href="" class="btn btn-danger">Supprimer</a> <!-- TODO A faire -->
-                                </div>
-                                <hr>
-                            </li>
-                        @endforeach
+                       @if($msg_adv->count() > 0)
+                            @foreach($msg_adv as $m)
+                                <li>
+                                    <p>Message de : <strong>{!! $m->user->name !!}</strong>, <em><small>{!! $m->created_at !!}</small></em></p>
+                                    <p><strong>{!! \Illuminate\Support\Str::limit($m->text,100) !!}</strong></p>
+                                    <div class="btn-group btn-group-xs">
+                                        <a href="#" class="btn btn-info" id="msg-{!! $m->id !!}" data-url="{!! action('Administration\MessagesController@__get_message', $m->id) !!}" data-msg="{!! $m->id !!}" onclick="get_message(this, event)" data-toggle="modal" data-target=".bs-example-modal-lg">Voir le message en entier</a> <!-- TODO A faire -->
+                                        <a href="{!! action('Administration\MessagesController@do_nothing', $m) !!}" class="btn btn-success">Ne rien faire</a>
+                                        <a href="{!! action('Administration\MessagesController@do_moderate', $m) !!}" class="btn btn-warning">Modérer</a>
+                                        <a href="#" onclick="event.preventDefault();if(confirm('Voulez-vous bloquer ce message ?')){document.getElementById('doDestroy-form-{!! $m->id !!}').submit();}" class="btn btn-danger">Bloquer</a>
+                                        {!! Form::open(['url' => action('Administration\MessagesController@lockMessages', $m) , 'method' => 'PUT', 'style' => 'display: none;', 'id' => 'doDestroy-form-'.$m->id.'']) !!}
+                                        {!! Form::close() !!}
+                                    </div>
+                                    <hr>
+                                </li>
+                            @endforeach
+                        @endif
                     </ul>
                     <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
                         <div class="modal-dialog modal-lg">
@@ -133,7 +175,9 @@
                                     <div class="btn-group">
                                         <a href="" id="doNothig" type="button" class="btn btn-success">Ne rien faire</a>
                                         <a href="" id="doModerate" type="button" class="btn btn-warning">Moderer</a>
-                                        <a type="button" class="btn btn-danger">Supprimer</a>
+                                        <a href="#" onclick="event.preventDefault();if(confirm('Voulez-vous bloquer ce message ?')){document.getElementById('doLock').submit();}" class="btn btn-danger">Bloquer</a>
+                                        {!! Form::open(['url' => '' , 'method' => 'PUT', 'style' => 'display: none;', 'id' => 'doLock']) !!}
+                                        {!! Form::close() !!}
                                         <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
                                     </div>
                                 </div>
@@ -160,12 +204,15 @@
                     type: 'GET',
                     dataType:'html',
                     success : function(response){ // code_html contient le HTML renvoyé
-                        var modalTitle = $('#modalTitle'),modalContent = $('#modalContent'), doNothing = $('#doNothig'), doModerate = $('#doModerate');
+                        var modalTitle = $('#modalTitle'),modalContent = $('#modalContent'), doNothing = $('#doNothig'), doModerate = $('#doModerate'), doLock = $('#doLock');
                         var data = jQuery.parseJSON(response);
                         modalTitle.text(data.user.name + ', '+data.msg.created_at);
+                        var do_lock = document.getElementById('doDestroy-form-'+data.msg.id).action;
+
                         modalContent.html(data.msg.text);
                         doNothing.attr('href', do_nothing);
                         doModerate.attr('href', do_moderate);
+                        doLock.attr('action', do_lock);
                     }
                 });
             })(jQuery)

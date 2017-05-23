@@ -27,9 +27,14 @@
                     </thead>
                     <tbody>
                         @foreach($threads as $thread)
-                            <tr class="clickable-row" data-href='{!! action('Pages\ForumsController@thread', $thread->slug) !!}'>
+                            <tr @if($thread->destroy != 1 OR Auth::user()->hasRole('sup_admin')) class="clickable-row" data-href='{!! action('Pages\ForumsController@thread', $thread->slug) !!}' @endif>
                                 <td></td>
-                                <td>{!! $thread->title !!}</td>
+                                <td>
+                                    {!! $thread->title !!}
+                                    @if($thread->destroy == 1)
+                                        <span class="text-danger">Ce sujet a été bloqué par l'administrateur du site.</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">{!! $thread->messages->whereNotIn('id', $thread->answer_id)->count() !!}</td>
                                 <td>
                                     @if($thread->messages->last()->id != $thread->answer_id)

@@ -16,3 +16,4 @@ use Illuminate\Http\Request;
 Route::get('/api/message{msg}', 'Administration\MessagesController@__get_message');
 
 
+

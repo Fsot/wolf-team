@@ -51,7 +51,11 @@ class ChannelsController extends Controller
         }
         $settings = Setting::where('name', 'like', 'forum%')->get();
         $msg_adv = Message::where('alert', 1)->get();
-        return view('channels.index', compact('channels', 'settings', 'categories', 'msg_adv'));
+        $total_subject = Thread::count();
+        $total_msg = Message::count();
+        $total_moderate = Message::where('moderate', 1)->count();
+        $total_destroy = Message::where('destroy', 1)->count();
+        return view('channels.index', compact('channels', 'settings', 'categories', 'msg_adv', 'total_destroy', 'total_moderate', 'total_msg', 'total_subject'));
     }
 
     public function create()
@@ -121,6 +125,15 @@ class ChannelsController extends Controller
             $channel = Channel::findOrFail($channel);
             if($channel){
                 $threads = Thread::where('channel_id', $channel->id)->get();
+                foreach ($threads as $thread){
+                    foreach ($thread->messages as $msg){
+                        if($thread->answer_id == $msg->id){
+                            if($msg->destroy == 1){
+                                $thread->destroy = 1;
+                            }
+                        }
+                    }
+                }
                 if(isset($threads)){
                     return view('channels.channel', compact('threads', 'channel'));
                 }
@@ -169,6 +182,36 @@ class ChannelsController extends Controller
         if($persist_categorie == true){
             return redirect()->back()->with('success', 'La catégorie a bien été sauvegardée');
         }
+    }
+
+    public function destroy_channel($channel)
+    {
+        if($channel){
+            if(is_numeric($channel)){
+                $delete = Channel::where('id', $channel)->delete();
+                if($delete){
+                    return redirect()->back()->with('success', 'Votre channel a bien été supprimé.');
+                }
+            }
+        }
+        return redirect()->back()->with('error', 'Erreur sur la suppression de votre channel.');
+    }
+
+    public function destroy_category($category_id)
+    {
+        if($category_id){
+            if(is_numeric($category_id)){
+                $category = Categorie::findOrFail($category_id);
+                if($category){
+                    Channel::where('categorie_id', $category->id)->delete();
+                    $d = $category->delete();
+                    if($d){
+                        return redirect()->back()->with('success', 'Votre catégorie a bien été suprimée.');
+                    }
+                }
+            }
+        }
+        return redirect()->back()->with('error', 'Erreur sur la supréssion de la catégorie.');
     }
 
     protected function created($data)

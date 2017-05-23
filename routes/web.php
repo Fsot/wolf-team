@@ -60,14 +60,19 @@ Route::group(['prefix' => 'admin'], function() {
         Route::get('/forum/activate', 'Administration\ChannelsController@activate_forum');
         Route::get('/forum/desactivate', 'Administration\ChannelsController@desactivate_forum');
         Route::post('/forum/add-categorie', 'Administration\ChannelsController@store_categorie');
+        Route::delete('/forum/supprimer/{channel}', 'Administration\ChannelsController@destroy_channel');
+        Route::delete('/forum/supprimer-category/{category}', 'Administration\ChannelsController@destroy_category');
 
         Route::get('/channel/{channel}', 'Administration\ChannelsController@channel');
         Route::get('/thread/{thread}', 'Administration\ThreadsController@thread');
+        Route::delete('/thread/delete/{thread}', 'Administration\ThreadsController@destroy_thread');
 
 
         Route::get('/message/do_nothing/{msg}', 'Administration\MessagesController@do_nothing');
         Route::get('/message/do_moderate/{msg}', 'Administration\MessagesController@do_moderate');
         Route::put('/message/store_moderate/{msg}', 'Administration\MessagesController@store_moderate');
+        Route::put('/message/lock/{msg}', 'Administration\MessagesController@lockMessages');
+        Route::put('/message/unlock/{msg}', 'Administration\MessagesController@unlockMessages');
     });
 });
 
@@ -83,4 +88,9 @@ Route::group(['prefix' => 'forum'], function(){
     Route::get('/sujet/edit-message/{message}', 'Pages\ForumsController@edit_message');
     Route::put('/sujet/edit-message/{message}', 'Pages\ForumsController@update_message');
     Route::get('/sujet/alert/{message}', 'Pages\ForumsController@advertissement');
+});
+
+Route::group(['prefix'=> 'api'], function(){
+    Route::get('/markread', 'NotificationsController@__markread');
+    Route::get('/destroyNotification', 'NotificationsController@destroyNotification');
 });

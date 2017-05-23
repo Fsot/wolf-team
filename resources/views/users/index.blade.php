@@ -60,7 +60,7 @@
                                 <td>{!! $user->created_at !!}</td>
                                 <td>{!! $user->profil->coins !!}</td>
                                 <td>
-                                    @role('admin')
+                                    @role('sup_admin')
                                     {!! Form::open(['url' => action('Administration\UsersController@assign_role', $user), 'action' => 'post', 'class' => 'form-inline']) !!}
                                     {!! Form::select('role', $roles) !!}
                                     {!! Form::submit('Sauvegarder', ['class' => 'btn btn-xs btn-success']) !!}

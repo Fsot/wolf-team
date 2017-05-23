@@ -11,6 +11,7 @@ namespace wolfteam\Http\Controllers\Pages;
 
 use Auth;
 use GrahamCampbell\Markdown\Facades\Markdown;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use League\HTMLToMarkdown\HtmlConverter;
@@ -24,9 +25,13 @@ use wolfteam\Models\Channel;
 use wolfteam\Models\Message;
 use wolfteam\Models\Setting;
 use wolfteam\Models\Thread;
+use wolfteam\Models\User;
+use wolfteam\Notifications\AlertedMessageAdmin;
 
 class ForumsController extends Controller
 {
+
+    use Notifiable;
 
     public function __construct()
     {
@@ -36,7 +41,7 @@ class ForumsController extends Controller
             $settings = Setting::where('name', 'like', 'forum%')->get();
             $s = $settings->where('name', 'forum_on')->first()->value;
             if($s == 0){
-                return redirect()->back()->with('info', 'Le forum est actuellement fermer. Rassurez-vous ce n\'est pas définitif.');
+                return redirect('/')->with('info', 'Le forum est actuellement fermer. Rassurez-vous ce n\'est pas définitif.');
             }
             return $next($request);
         });
@@ -60,6 +65,15 @@ class ForumsController extends Controller
         $channel = Channel::where('slug', $channel)->first();
         $threads = Thread::where('channel_id', $channel->id)->get();
         if($channel){
+            foreach ($threads as $thread){
+                foreach ($thread->messages as $msg){
+                    if($thread->answer_id == $msg->id){
+                        if($msg->destroy == 1){
+                            $thread->destroy = 1;
+                        }
+                    }
+                }
+            }
             return view('forums.channel', compact('channel', 'threads'));
         }
     }
@@ -89,6 +103,11 @@ class ForumsController extends Controller
             $message->text = Markdown::convertToHtml($request->input('content'));
             $message->user_id = Auth::id();
             $message->thread_id = $thread->id;
+            $message->alert = 0;
+            $message->moderate = 0;
+            $message->doModerate = 0;
+            $message->destroy = 0;
+
 
             $save_message = $message->save();
 
@@ -106,20 +125,22 @@ class ForumsController extends Controller
     {
         if($thread_id && is_numeric($thread_id)){
             $thread = Thread::findOrFail($thread_id);
+            if($thread->user_id == Auth::id() OR Auth::user()->can('edit_other_message')){
+                $thread->content = $thread->messages->where('id', $thread->answer_id)->first()->text;
+                $converter = new HtmlConverter(['header_style' => 'atx']);
+                $thread->content = $converter->convert($thread->content);
 
-
-            $thread->content = $thread->messages->where('id', $thread->answer_id)->first()->text;
-            $converter = new HtmlConverter();
-            $thread->content = $converter->convert($thread->content);
-
-            if($thread){
-                $c = Channel::all();
-                if($c){
-                    $channel = $c->where('id', $thread->channel_id)->first();
-                    $channels = $c->pluck('title', 'id');
-                    return view('forums.edit_thread', compact('thread', 'channel', 'channels'));
+                if($thread){
+                    $c = Channel::all();
+                    if($c){
+                        $channel = $c->where('id', $thread->channel_id)->first();
+                        $channels = $c->pluck('title', 'id');
+                        return view('forums.edit_thread', compact('thread', 'channel', 'channels'));
+                    }
                 }
-            }
+            }else{
+                return redirect()->back()->with('info', 'Vous ne pouvez pas modifier le message des autres');
+            };
         }
     }
 
@@ -152,6 +173,9 @@ class ForumsController extends Controller
         $thread = Thread::where('slug', $thread_slug)->first();
         $content = Message::where('thread_id', $thread->id)->orderBy('created_at', 'desc')->get();
         $subject = $content->where('id', $thread->answer_id)->first();
+        if($subject->destroy == true && !Auth::user()->hasRole('sup_admin')) {
+            return redirect()->back()->with('info', 'Ce message a été bloqu" par notre équipe.');
+        }
         $messages = $content->whereNotIn('id', $thread->answer_id);
         $count_answers = $messages->count();
         $answers = $this->paginate($messages->all(), 15);
@@ -164,7 +188,10 @@ class ForumsController extends Controller
         $message = Message::create([
             'text' =>  Markdown::convertToHtml($request->input('content')),
             'user_id'   => Auth::id(),
-            'thread_id' => $thread
+            'thread_id' => $thread,
+            'alert' => false,
+            'moderate' => false,
+            'destroy' => false
         ]);
 
         if($message){
@@ -179,7 +206,7 @@ class ForumsController extends Controller
                 $msg = Message::findOrFail($msg_id);
                 if($msg){
                     if($msg->user_id == Auth::user()->id){
-                        $converter = new HtmlConverter();
+                        $converter = new HtmlConverter(['header_style' => 'atx']);
                         $msg->text = $converter->convert($msg->text);
                         return view('forums.edit_message', compact('msg'));
                     }
@@ -210,10 +237,20 @@ class ForumsController extends Controller
             if(is_numeric($msg_id)){
                 $msg = Message::findOrFail($msg_id);
                 if($msg){
-                    $msg->update([
+                    $updated = $msg->update([
                        'alert' => true
                     ]);
-                    return redirect()->back()->with('success', 'Le message a bien été signalé à notre equipe. Nous allons effectuer des verifications sur son contenu.');
+                    if($updated == true){
+                        $users = User::all();
+                        foreach ($users as $user){
+                            if($user->hasRole('sup_admin')){
+                                if($user){
+                                    $user->notify(new AlertedMessageAdmin($msg));
+                                }
+                            }
+                        }
+                        return redirect()->back()->with('success', 'Le message a bien été signalé à notre equipe. Nous allons effectuer des verifications sur son contenu.');
+                    }
                 }
             }
         }

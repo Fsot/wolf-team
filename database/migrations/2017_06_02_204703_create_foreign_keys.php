@@ -25,12 +25,12 @@ class CreateForeignKeys extends Migration {
 		});
 		Schema::table('messages', function(Blueprint $table) {
 			$table->foreign('user_id')->references('id')->on('users')
-						->onDelete('no action')
+						->onDelete('cascade')
 						->onUpdate('cascade');
 		});
 		Schema::table('messages', function(Blueprint $table) {
 			$table->foreign('thread_id')->references('id')->on('threads')
-						->onDelete('no action')
+						->onDelete('cascade')
 						->onUpdate('cascade');
 		});
 
