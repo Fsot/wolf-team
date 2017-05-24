@@ -27,11 +27,7 @@ class Profil extends Model
     }
 
     protected function getAvatarName(){
-        if(\Auth::check()){
-            return \Auth::user()->name;
-        }else{
-            return \Route::current()->parameters['username'];
-        }
+        return \Auth::user()->name;
     }
 
     public function users()
@@ -41,12 +37,16 @@ class Profil extends Model
 
     public function setBirthdayAttribute($birth)
     {
-        return $this->attributes['birthday'] = Carbon::createFromFormat('d/m/Y', $birth)->format('Y-m-d');
+        if($birth){
+            return $this->attributes['birthday'] = Carbon::createFromFormat('d/m/Y', $birth)->format('Y-m-d');
+        }
     }
 
     public function getBirthdayAttribute($birth)
     {
-        return Carbon::createFromFormat('Y-m-d', $birth)->format('d/m/Y');
+        if($birth){
+            return Carbon::createFromFormat('Y-m-d', $birth)->format('d/m/Y');
+        }
     }
 
     public function setAvatarAttribute($avatar){
@@ -65,11 +65,13 @@ class Profil extends Model
         $this->attributes['avatar'] = false;
     }
 
-    public function getAvatarAttribute($avatar, $user = null)
+    public function avatar($user = null)
     {
-        if($avatar == true){
-            if (file_exists(storage_path('app/public'. $this->getImageDir() . $this->getAvatarName() . '.png'))){
-                return asset('users/avatars/' . $this->getAvatarName() .  '.png');
+        if($user == true){
+            if (file_exists(storage_path('app/public'. $this->getImageDir() . $user . '.png'))){
+                return asset('users/avatars/' . $user .  '.png');
+            }else{
+                return 'https://www.gravatar.com/avatar/'.md5($user);
             }
         }
     }

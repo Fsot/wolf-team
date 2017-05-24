@@ -68,6 +68,7 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => wolfteam\Models\User::class,
+            'table' => 'users',
         ],
 
         // 'users' => [
