@@ -186,6 +186,7 @@ return [
         Intervention\Image\ImageServiceProvider::class,
         Zizaco\Entrust\EntrustServiceProvider::class,
         GrahamCampbell\Markdown\MarkdownServiceProvider::class,
+        Cog\Ban\Providers\BanServiceProvider::class,
     ],
 
     /*

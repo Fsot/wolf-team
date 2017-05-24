@@ -9,7 +9,10 @@
 
         <div class="title_right">
             <div class="pull-right">
-                <a href="{!! action('Administration\ChannelsController@index') !!}" class="btn btn-default">Retour</a>
+                <div class="btn-group" role="btn-group">
+                    <a href="{!! action('Administration\ThreadsController@create', $channel->id) !!}" class="btn btn-success">Ajouter un sujet</a>
+                    <a href="{!! action('Administration\ChannelsController@index') !!}" class="btn btn-default">Retour</a>
+                </div>
             </div>
         </div>
     </div>
@@ -70,7 +73,7 @@
                                 <td>
                                     <div class="btn-group">
                                         <a href="{!! action('Administration\ThreadsController@thread', $thread) !!}" class="btn btn-xs btn-info">Voir</a>
-                                        <a href="#" class="btn btn-xs btn-danger" onclick="event.preventDefault(); document.getElementById('destroy_thread-form').submit();">Supprimer</a>
+                                        <a href="#" class="btn btn-xs btn-danger" onclick="event.preventDefault(); if(confirm('Voulez-vous vraiment suprimer ce sujet ? Cette action est irreversible et supprimera tous les messages liées.')){document.getElementById('destroy_thread-form').submit();}">Supprimer</a>
                                         {!! Form::open(['url' => action('Administration\ThreadsController@destroy_thread', $thread), 'method' => 'delete', 'id' => 'destroy_thread-form']) !!}
                                         {!! Form::close() !!}
                                     </div>

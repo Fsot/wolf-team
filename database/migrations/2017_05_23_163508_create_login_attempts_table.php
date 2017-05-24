@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTableChannels extends Migration
+class CreateLoginAttemptsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,13 @@ class CreateTableChannels extends Migration
      */
     public function up()
     {
-        Schema::create('channels', function (Blueprint $table) {
+        Schema::create('login_attempts', function (Blueprint $table) {
             $table->increments('id');
-            $table->timestamps();
-            $table->string('title', 100);
-            $table->string('slug', 150);
-            $table->string('color', 16);
+            $table->integer('user_id')->nullable();
+            $table->string('login_ip');
+            $table->timestamp('login_time');
+            $table->string('browser_agent');
+            $table->boolean('success');
         });
     }
 
@@ -29,6 +30,6 @@ class CreateTableChannels extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('channels');
+        Schema::dropIfExists('login_attempts');
     }
 }

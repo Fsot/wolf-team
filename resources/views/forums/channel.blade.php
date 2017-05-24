@@ -19,7 +19,7 @@
                 <table class="table table-hover table-bordered">
                     <thead>
                         <tr>
-                            <td></td>
+                            <td style="width: 20px;"></td>
                             <td>Sujet</td>
                             <td class="text-center" style="width: 150px;">Réponses</td>
                             <td style="width: 250px;">Dernier message</td>
@@ -28,7 +28,7 @@
                     <tbody>
                         @foreach($threads as $thread)
                             <tr @if($thread->destroy != 1 OR Auth::user()->hasRole('sup_admin')) class="clickable-row" data-href='{!! action('Pages\ForumsController@thread', $thread->slug) !!}' @endif>
-                                <td></td>
+                                <td><i class="glyphicon glyphicon-stop @if($thread->new_msg == true) text-success @endif"></i></td>
                                 <td>
                                     {!! $thread->title !!}
                                     @if($thread->destroy == 1)

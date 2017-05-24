@@ -33,16 +33,6 @@
             </div>
         </div>
 
-        <div class="form-group{{ $errors->has('icon') ? ' has-error' : '' }}">
-            <div class="col-md-12">
-                <label>Icon</label>
-                {!! Form::select('icon', $icon, null, ['class' => 'form-control'])  !!}
-                @if ($errors->has('icon'))
-                    <span class="help-block"><strong>{{ $errors->first('icon') }}</strong></span>
-                @endif
-            </div>
-        </div>
-
         <div class="form-group{{ $errors->has('block') ? ' has-error' : '' }}">
             <div class="col-md-12">
                 <label>{!! Form::checkbox('block', null, $channel->block)  !!} Bloquer le forum</label>

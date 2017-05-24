@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTableChannels extends Migration
+class CreateBlackWordTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,9 @@ class CreateTableChannels extends Migration
      */
     public function up()
     {
-        Schema::create('channels', function (Blueprint $table) {
+        Schema::create('black_words', function (Blueprint $table) {
             $table->increments('id');
-            $table->timestamps();
-            $table->string('title', 100);
-            $table->string('slug', 150);
-            $table->string('color', 16);
+            $table->string('word');
         });
     }
 
@@ -29,6 +26,6 @@ class CreateTableChannels extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('channels');
+        Schema::dropIfExists('black_words');
     }
 }

@@ -30,11 +30,6 @@ class ChannelsController extends Controller
         'yellow' => 'Jaune',
         'orange' => 'Orange',
     ];
-    protected $icon = [
-        'classique' => 'Classique',
-        'important' => 'Important',
-        'fixed' => 'Fixer',
-    ];
 
     public function __construct()
     {
@@ -62,8 +57,10 @@ class ChannelsController extends Controller
     {
         $channel = new Channel();
         $color = $this->color;
-        $icon = $this->icon;
         $categories = Categorie::where('type', 'forum')->pluck('title', 'id');
+        if($categories->count() == 0){
+            return redirect()->back()->with('info', 'Vous n\'avez pas de catégorie enregistré. Vous devez créer une catégorie avant de mettre en place des channels');
+        }
         return view('channels.create', compact('channel','color','icon', 'categories'));
     }
 
@@ -75,7 +72,6 @@ class ChannelsController extends Controller
             'title' => $request->title,
             'slug'  => $request->slug,
             'color'  => $request->color,
-            'icon'  => 'test', // TODO a modif
             'block' => $request->block,
             'categorie_id' => $request->categorie
         ]);
@@ -91,7 +87,6 @@ class ChannelsController extends Controller
             $channel = Channel::findOrFail($data);
             if($channel) {
                 $color = $this->color;
-                $icon= $this->icon;
                 $categories = Categorie::where('type', 'forum')->pluck('title', 'id');
                 return view('channels.edit', compact('channel','icon','color', 'categories'));
             }
@@ -108,7 +103,6 @@ class ChannelsController extends Controller
                 $update = $channel->update([
                     'title' => $request->title,
                     'color' => $request->color,
-                    'icon' => $request->icon,
                     'block' => $request->block,
                     'categorie_id' => $request->categorie
                 ]);
@@ -124,7 +118,7 @@ class ChannelsController extends Controller
         if($channel){
             $channel = Channel::findOrFail($channel);
             if($channel){
-                $threads = Thread::where('channel_id', $channel->id)->get();
+                $threads = Thread::where('channel_id', $channel->id)->orderByDesc('created_at')->get();
                 foreach ($threads as $thread){
                     foreach ($thread->messages as $msg){
                         if($thread->answer_id == $msg->id){

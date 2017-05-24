@@ -6,11 +6,14 @@ use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
+use Cog\Ban\Contracts\HasBans as HasBansContract;
+use Cog\Ban\Traits\HasBans;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasBansContract
 {
     use Notifiable;
     use EntrustUserTrait;
+    use HasBans;
 
     /**
      * The attributes that are mass assignable.
@@ -39,6 +42,11 @@ class User extends Authenticatable
     public function profil()
     {
         return $this->hasOne(Profil::class);
+    }
+
+    public function logins()
+    {
+        return $this->hasMany(LoginAttempt::class);
     }
 
     public function getCreatedAtAttribute($created)

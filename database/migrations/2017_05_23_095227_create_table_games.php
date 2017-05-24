@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTableChannels extends Migration
+class CreateTableGames extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateTableChannels extends Migration
      */
     public function up()
     {
-        Schema::create('channels', function (Blueprint $table) {
-            $table->increments('id');
-            $table->timestamps();
-            $table->string('title', 100);
-            $table->string('slug', 150);
-            $table->string('color', 16);
+        Schema::create('games', function (Blueprint $table){
+           $table->increments('id');
+           $table->string('title', 150);
+           $table->string('slug', 240);
+           $table->text('descriptions')->nullable();
+           $table->boolean('multiplayers')->default(false);
         });
     }
 
@@ -29,6 +29,6 @@ class CreateTableChannels extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('channels');
+        Schema::dropIfExists('games');
     }
 }

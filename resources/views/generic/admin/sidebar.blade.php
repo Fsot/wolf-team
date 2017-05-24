@@ -31,13 +31,20 @@
             <div class="menu_section">
                 <h3>General</h3>
                 <ul class="nav side-menu">
-                    <li><a><i class="fa fa-home"></i> Forum <span class="fa fa-chevron-down"></span></a>
+                    <li><a><i class="fa fa-bookmark-o"></i> Forum <span class="fa fa-chevron-down"></span></a>
                         <ul class="nav child_menu">
                             <li><a href="{!! action('Administration\ChannelsController@index') !!}">Liste des forums</a></li>
                             <li><a href="{!! action('Administration\ChannelsController@create') !!}">Ajouter un forum</a></li>
+                            <li><a href="{!! action('Administration\BlackWordsController@index') !!}">Liste des mots noirs</a></li>
                         </ul>
                     </li>
-                    <li><a><i class="fa fa-home"></i> Utilisateurs <span class="fa fa-chevron-down"></span></a>
+                    <li><a><i class="fa fa-gamepad"></i> Jeux <span class="fa fa-chevron-down"></span></a>
+                        <ul class="nav child_menu">
+                            <li><a href="{!! action('Administration\GamesController@index') !!}">Liste des jeux</a></li>
+                            <li><a href="{!! action('Administration\ChannelsController@create') !!}">Ajouter un jeu</a></li>
+                        </ul>
+                    </li>
+                    <li><a><i class="fa fa-users"></i> Utilisateurs <span class="fa fa-chevron-down"></span></a>
                         <ul class="nav child_menu">
                             <li><a href="{!! action('Administration\UsersController@index') !!}">Liste des utilisateurs</a></li>
                             <li><a>Rôles<span class="fa fa-chevron-down"></span></a>
@@ -52,6 +59,12 @@
                                     <li><a href="{!! action('Administration\PermissionsController@create') !!}">Ajouter une permission</a></li>
                                 </ul>
                             </li>
+                        </ul>
+                    </li>
+                    <li><a><i class="fa fa-life-bouy"></i> Sécurité <span class="fa fa-chevron-down"></span></a>
+                        <ul class="nav child_menu">
+                            <li><a href="{!! action('Administration\SecuritiesController@index') !!}">Accueil</a></li>
+                            <li><a href="{!! action('Administration\SecuritiesController@user') !!}">Utilisateurs</a></li>
                         </ul>
                     </li>
                 </ul>

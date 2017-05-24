@@ -51,7 +51,6 @@
                                 <td></td>
                                 <td>Nom du forum</td>
                                 <td>Catégorie</td>
-                                <td>Icone</td>
                                 <td>Couleur</td>
                                 <td>Sujets</td>
                                 <td style="width: 175px">Action</td>
@@ -61,9 +60,13 @@
                                 @foreach($c as $channel)
                                     <tr>
                                         <td>{!! $channel->id !!}</td>
-                                        <td><a href="{{ action('Administration\ChannelsController@channel', $channel) }}">{!! $channel->title !!} </a></td>
+                                        <td>
+                                            <a href="{{ action('Administration\ChannelsController@channel', $channel) }}">{!! $channel->title !!} </a>
+                                            @if($channel->block == 1)
+                                                <span class="label label-info">Ce channel est bloqué</span>
+                                            @endif
+                                        </td>
                                         <td>{!! $channel->categorie->title !!}</td>
-                                        <td>{!! $channel->icon !!} </td>
                                         <td>{!! $channel->color !!} </td>
                                         <td style="text-align: center">{!! $channel->threads->count() !!} </td>
                                         <td>

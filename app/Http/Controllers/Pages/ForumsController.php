@@ -10,6 +10,7 @@ namespace wolfteam\Http\Controllers\Pages;
 
 
 use Auth;
+use Carbon\Carbon;
 use GrahamCampbell\Markdown\Facades\Markdown;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -20,8 +21,10 @@ use wolfteam\Http\Requests\AnswerRequest;
 use wolfteam\Http\Requests\UpdateForumChannelRequest;
 use wolfteam\Http\Requests\UpdateMessageRequest;
 use wolfteam\Http\Requests\UpdateThreadRequest;
+use wolfteam\Models\BlackWord;
 use wolfteam\Models\Categorie;
 use wolfteam\Models\Channel;
+use wolfteam\Models\LoginAttempt;
 use wolfteam\Models\Message;
 use wolfteam\Models\Setting;
 use wolfteam\Models\Thread;
@@ -57,16 +60,40 @@ class ForumsController extends Controller
         foreach ($categories as $category) {
             $channels[$category->title] = $c->where('categorie_id', $category->id);
         }
+        foreach ($c as $chan){
+            $loginAttempts = LoginAttempt::where('user_id', Auth::id())->where('success', true)->orderBy('login_time', 'desc')->select('login_time')->get();
+            if(isset($loginAttempts[1])) {
+                $last_login = Carbon::createFromFormat('Y-m-d H:i:s', $loginAttempts[1]->login_time);
+                foreach ($chan->threads as $thread) {
+                    foreach ($thread->messages as $message) {
+                        if ($message->updated_at->timestamp > $last_login->timestamp) {
+                            $chan->new_msg = true;
+                        } else {
+                            $chan->new_msg = false;
+                        }
+                    }
+                }
+            }
+        }
         return view('forums.index', compact('channels'));
     }
 
     public function channel($channel)
     {
         $channel = Channel::where('slug', $channel)->first();
-        $threads = Thread::where('channel_id', $channel->id)->get();
+        $threads = Thread::where('channel_id', $channel->id)->orderByDesc('created_at')->get();
         if($channel){
+            $loginAttempts = LoginAttempt::where('user_id', Auth::id())->where('success', true)->orderBy('login_time', 'desc')->select('login_time')->get();
             foreach ($threads as $thread){
                 foreach ($thread->messages as $msg){
+                    if(isset($loginAttempts[1])) {
+                        $last_login = Carbon::createFromFormat('Y-m-d H:i:s', $loginAttempts[1]->login_time);
+                        if ($msg->updated_at->timestamp > $last_login->timestamp) {
+                            $thread->new_msg = true;
+                        } else {
+                            $thread->new_msg = false;
+                        }
+                    }
                     if($thread->answer_id == $msg->id){
                         if($msg->destroy == 1){
                             $thread->destroy = 1;
@@ -100,14 +127,15 @@ class ForumsController extends Controller
         $save_thread = $thread->save();
 
         if($save_thread){
-            $message->text = Markdown::convertToHtml($request->input('content'));
+            $content = $this->black_words($request->input('content'));
+
+            $message->text = Markdown::convertToHtml($content);
             $message->user_id = Auth::id();
             $message->thread_id = $thread->id;
             $message->alert = 0;
             $message->moderate = 0;
             $message->doModerate = 0;
             $message->destroy = 0;
-
 
             $save_message = $message->save();
 
@@ -185,18 +213,25 @@ class ForumsController extends Controller
 
     public function answer($thread, AnswerRequest $request)
     {
-        $message = Message::create([
-            'text' =>  Markdown::convertToHtml($request->input('content')),
-            'user_id'   => Auth::id(),
-            'thread_id' => $thread,
-            'alert' => false,
-            'moderate' => false,
-            'destroy' => false
-        ]);
+       if($thread){
+            if(is_numeric($thread)){
+                $answer = $this->black_words($request->input('content'));
+                $message = Message::create([
+                    'text' =>  Markdown::convertToHtml($answer),
+                    'user_id'   => Auth::id(),
+                    'thread_id' => $thread,
+                    'alert' => false,
+                    'moderate' => false,
+                    'destroy' => false
+                ]);
+                if($message){
+                    return redirect()->back()->with('success', 'Votre message a été publié.');
+                }
+            }
+       }
 
-        if($message){
-            return redirect()->back()->with('success', 'Votre message a été publié.');
-        }
+
+
     }
 
     public function edit_message($msg_id)
@@ -271,5 +306,12 @@ class ForumsController extends Controller
         );
     }
 
-
+    private function black_words($str){
+        $blackwords = BlackWord::all();
+        $patterns = [];
+        foreach ($blackwords as $bw){
+           array_push($patterns, '/\b'.$bw->word.'\b/i');
+        }
+        return preg_replace($patterns, '****',$str);
+    }
 }

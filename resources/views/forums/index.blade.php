@@ -15,7 +15,7 @@
                         <tbody>
                         @foreach($c as $channel)
                             <tr class="clickable-row" data-href='{!! action('Pages\ForumsController@channel', $channel->slug) !!}'>
-                                <td><i class="glyphicon glyphicon-asterisk" style="color: {!! $channel->color !!}"></i></td>
+                                <td style="width:20px;"><span class="glyphicon glyphicon-stop @if($channel->new_msg == true) text-success @endif"></span></td>
                                 <td>{!! $channel->title !!}</td>
                             </tr>
                         @endforeach

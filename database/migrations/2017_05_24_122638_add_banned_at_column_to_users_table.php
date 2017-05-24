@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTableChannels extends Migration
+class AddBannedAtColumnToUsersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,8 @@ class CreateTableChannels extends Migration
      */
     public function up()
     {
-        Schema::create('channels', function (Blueprint $table) {
-            $table->increments('id');
-            $table->timestamps();
-            $table->string('title', 100);
-            $table->string('slug', 150);
-            $table->string('color', 16);
+        Schema::table('users', function (Blueprint $table) {
+            $table->timestamp('banned_at')->nullable();
         });
     }
 
@@ -29,6 +25,8 @@ class CreateTableChannels extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('channels');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('banned_at');
+        });
     }
 }
